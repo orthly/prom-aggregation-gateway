@@ -31,7 +31,7 @@ type ignoredLabels []string
 
 type aggregateOptions struct {
 	ignoredLabels     ignoredLabels
-	metricTTLDuration *time.Duration
+	counterExpiration *time.Duration
 }
 
 type aggregateOptionsFunc func(a *Aggregate)
@@ -42,9 +42,9 @@ func AddIgnoredLabels(ignoredLabels ...string) aggregateOptionsFunc {
 	}
 }
 
-func SetTTLMetricTime(duration *time.Duration) aggregateOptionsFunc {
+func SetCounterExpiration(duration *time.Duration) aggregateOptionsFunc {
 	return func(a *Aggregate) {
-		a.options.metricTTLDuration = duration
+		a.options.counterExpiration = duration
 	}
 }
 
@@ -101,7 +101,7 @@ func (a *Aggregate) setFamilyOrGetExistingFamily(familyName string, family *dto.
 func (a *Aggregate) saveFamily(familyName string, family *dto.MetricFamily) error {
 	existingFamily := a.setFamilyOrGetExistingFamily(familyName, family)
 	if existingFamily != nil {
-		err := existingFamily.mergeFamily(family, *a.options.metricTTLDuration)
+		err := existingFamily.mergeFamily(family, *a.options.counterExpiration)
 		if err != nil {
 			return err
 		}
