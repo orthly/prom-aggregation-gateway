@@ -1,9 +1,9 @@
 package metrics
 
 import (
-  "time"
+	"time"
 
-  "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const MetricsNamespace = "prom_agg_gateway"
@@ -13,8 +13,8 @@ var PromRegistry = prometheus.NewRegistry()
 var metricsClock func() time.Time
 
 func init() {
-  // NOTE(lxf): Clock is overridable for testing purposes.
-  metricsClock = time.Now
+	// NOTE(lxf): Clock is overridable for testing purposes.
+	metricsClock = time.Now
 
 	PromRegistry.MustRegister(
 		TotalFamiliesGauge,

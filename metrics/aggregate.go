@@ -17,8 +17,8 @@ import (
 
 type metricFamily struct {
 	*dto.MetricFamily
-  lastUpdated time.Time
-	lock sync.RWMutex
+	lastUpdated time.Time
+	lock        sync.RWMutex
 }
 
 type Aggregate struct {

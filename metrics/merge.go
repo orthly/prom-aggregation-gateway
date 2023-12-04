@@ -2,25 +2,25 @@ package metrics
 
 import (
 	"fmt"
-  "time"
+	"time"
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/model"
 )
 
 func appendIfNotExpired(in []*dto.Metric, metric *dto.Metric, expiry time.Duration) []*dto.Metric {
-  // Don't expire metrics that didn't report their timestamps
-  if expiry == 0 || metric.TimestampMs == nil {
-    return append(in,metric)
-  }
+	// Don't expire metrics that didn't report their timestamps
+	if expiry == 0 || metric.TimestampMs == nil {
+		return append(in, metric)
+	}
 
-  // Metric hasn't expired yet
-  if metricsClock().Sub(time.Unix(0, int64(*metric.TimestampMs)*1000000)) < expiry {
-    return append(in, metric)
-  }
+	// Metric hasn't expired yet
+	if metricsClock().Sub(time.Unix(0, int64(*metric.TimestampMs)*1000000)) < expiry {
+		return append(in, metric)
+	}
 
-  // Metric has expired, don't append
-  return in
+	// Metric has expired, don't append
+	return in
 }
 
 func labelsLessThan(a, b []*dto.LabelPair) bool {
@@ -91,8 +91,8 @@ func mergeMetric(ty dto.MetricType, a, b *dto.Metric) *dto.Metric {
 	switch ty {
 	case dto.MetricType_COUNTER:
 		return &dto.Metric{
-			Label: a.Label,
-      TimestampMs: b.TimestampMs,
+			Label:       a.Label,
+			TimestampMs: b.TimestampMs,
 			Counter: &dto.Counter{
 				Value: float64ptr(*a.Counter.Value + *b.Counter.Value),
 			},
@@ -162,7 +162,7 @@ func (mf *metricFamily) mergeFamily(b *dto.MetricFamily, ttl time.Duration) erro
 		} else {
 			merged := mergeMetric(*mf.Type, mf.Metric[i], b.Metric[j])
 			if merged != nil {
-        newMetric = appendIfNotExpired(newMetric, merged, ttl)
+				newMetric = appendIfNotExpired(newMetric, merged, ttl)
 			}
 			i++
 			j++
@@ -177,7 +177,7 @@ func (mf *metricFamily) mergeFamily(b *dto.MetricFamily, ttl time.Duration) erro
 	}
 
 	mf.Metric = newMetric
-  mf.lastUpdated = metricsClock()
+	mf.lastUpdated = metricsClock()
 	return nil
 }
 

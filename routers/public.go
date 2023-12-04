@@ -1,7 +1,7 @@
 package routers
 
 import (
-  "time"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -12,10 +12,10 @@ import (
 )
 
 type ApiRouterConfig struct {
-	CorsDomain   string
-	Accounts     []string
-  CounterExpiration time.Duration
-	authAccounts gin.Accounts
+	CorsDomain        string
+	Accounts          []string
+	CounterExpiration time.Duration
+	authAccounts      gin.Accounts
 }
 
 func setupAPIRouter(cfg ApiRouterConfig, agg *metrics.Aggregate, promConfig promMetrics.Config) *gin.Engine {

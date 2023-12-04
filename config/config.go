@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
-  "time"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -17,11 +17,11 @@ var (
 )
 
 type Server struct {
-	ApiListen       string
-	LifecycleListen string
-	CorsDomain      string
-	AuthUsers       []string
-  CounterExpiration time.Duration
+	ApiListen         string
+	LifecycleListen   string
+	CorsDomain        string
+	AuthUsers         []string
+	CounterExpiration time.Duration
 }
 
 const (
