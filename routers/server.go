@@ -15,7 +15,7 @@ func RunServers(cfg ApiRouterConfig, apiListen string, lifecycleListen string) {
 	sigChannel := make(chan os.Signal, 1)
 	signal.Notify(sigChannel, syscall.SIGTERM, syscall.SIGINT)
 
-	agg := metrics.NewAggregate()
+	agg := metrics.NewAggregate(metrics.SetTTLMetricTime(&cfg.CounterExpiration))
 
 	promMetricsConfig := promMetrics.Config{
 		Registry: metrics.PromRegistry,

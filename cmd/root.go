@@ -26,6 +26,7 @@ func Execute() {
 	rootCmd.PersistentFlags().StringVar(&cfg.ApiListen, "apiListen", ":80", "Listen for API requests on this host/port.")
 	rootCmd.PersistentFlags().StringVar(&cfg.LifecycleListen, "lifecycleListen", ":8888", "Listen for lifecycle requests (health, metrics) on this host/port")
 	rootCmd.PersistentFlags().StringVar(&cfg.CorsDomain, "cors", "*", "The 'Access-Control-Allow-Origin' value to be returned.")
+	rootCmd.PersistentFlags().DurationVar(&cfg.CounterExpiration, "counter-expiration",0, "Reset counters that haven't been exercised after this duration. 0 disables expiration.")
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

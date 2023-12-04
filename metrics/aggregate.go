@@ -17,6 +17,7 @@ import (
 
 type metricFamily struct {
 	*dto.MetricFamily
+  lastUpdated time.Time
 	lock sync.RWMutex
 }
 
@@ -91,7 +92,7 @@ func (a *Aggregate) setFamilyOrGetExistingFamily(familyName string, family *dto.
 	defer a.familiesLock.Unlock()
 	existingFamily, ok := a.families[familyName]
 	if !ok {
-		a.families[familyName] = &metricFamily{MetricFamily: family}
+		a.families[familyName] = &metricFamily{MetricFamily: family, lastUpdated: metricsClock()}
 		return nil
 	}
 	return existingFamily
@@ -100,7 +101,7 @@ func (a *Aggregate) setFamilyOrGetExistingFamily(familyName string, family *dto.
 func (a *Aggregate) saveFamily(familyName string, family *dto.MetricFamily) error {
 	existingFamily := a.setFamilyOrGetExistingFamily(familyName, family)
 	if existingFamily != nil {
-		err := existingFamily.mergeFamily(family)
+		err := existingFamily.mergeFamily(family, *a.options.metricTTLDuration)
 		if err != nil {
 			return err
 		}
@@ -155,8 +156,8 @@ func (a *Aggregate) HandleRender(c *gin.Context) {
 func (a *Aggregate) encodeAllMetrics(writer io.Writer, contentType expfmt.Format) {
 	enc := expfmt.NewEncoder(writer, contentType)
 
-	a.familiesLock.RLock()
-	defer a.familiesLock.RUnlock()
+	a.familiesLock.Lock()
+	defer a.familiesLock.Unlock()
 
 	metricNames := []string{}
 	metricTypeCounts := make(map[string]int)

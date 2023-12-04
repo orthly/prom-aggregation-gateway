@@ -2,10 +2,26 @@ package metrics
 
 import (
 	"fmt"
+  "time"
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/model"
 )
+
+func appendIfNotExpired(in []*dto.Metric, metric *dto.Metric, expiry time.Duration) []*dto.Metric {
+  // Don't expire metrics that didn't report their timestamps
+  if expiry == 0 || metric.TimestampMs == nil {
+    return append(in,metric)
+  }
+
+  // Metric hasn't expired yet
+  if metricsClock().Sub(time.Unix(0, int64(*metric.TimestampMs)*1000000)) < expiry {
+    return append(in, metric)
+  }
+
+  // Metric has expired, don't append
+  return in
+}
 
 func labelsLessThan(a, b []*dto.LabelPair) bool {
 	i, j := 0, 0
@@ -76,6 +92,7 @@ func mergeMetric(ty dto.MetricType, a, b *dto.Metric) *dto.Metric {
 	case dto.MetricType_COUNTER:
 		return &dto.Metric{
 			Label: a.Label,
+      TimestampMs: b.TimestampMs,
 			Counter: &dto.Counter{
 				Value: float64ptr(*a.Counter.Value + *b.Counter.Value),
 			},
@@ -124,7 +141,7 @@ func mergeMetric(ty dto.MetricType, a, b *dto.Metric) *dto.Metric {
 	return nil
 }
 
-func (mf *metricFamily) mergeFamily(b *dto.MetricFamily) error {
+func (mf *metricFamily) mergeFamily(b *dto.MetricFamily, ttl time.Duration) error {
 	if *mf.Type != *b.Type {
 		return fmt.Errorf("cannot merge metric '%s': type %s != %s",
 			*mf.Name, mf.Type.String(), b.Type.String())
@@ -137,15 +154,15 @@ func (mf *metricFamily) mergeFamily(b *dto.MetricFamily) error {
 	defer mf.lock.Unlock()
 	for i < len(mf.Metric) && j < len(b.Metric) {
 		if labelsLessThan(mf.Metric[i].Label, b.Metric[j].Label) {
-			newMetric = append(newMetric, mf.Metric[i])
+			newMetric = appendIfNotExpired(newMetric, mf.Metric[i], ttl)
 			i++
 		} else if labelsLessThan(b.Metric[j].Label, mf.Metric[i].Label) {
-			newMetric = append(newMetric, b.Metric[j])
+			newMetric = appendIfNotExpired(newMetric, mf.Metric[j], ttl)
 			j++
 		} else {
 			merged := mergeMetric(*mf.Type, mf.Metric[i], b.Metric[j])
 			if merged != nil {
-				newMetric = append(newMetric, merged)
+        newMetric = appendIfNotExpired(newMetric, merged, ttl)
 			}
 			i++
 			j++
@@ -160,6 +177,7 @@ func (mf *metricFamily) mergeFamily(b *dto.MetricFamily) error {
 	}
 
 	mf.Metric = newMetric
+  mf.lastUpdated = metricsClock()
 	return nil
 }
 

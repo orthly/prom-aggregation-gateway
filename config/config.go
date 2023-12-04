@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+  "time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -20,6 +21,7 @@ type Server struct {
 	LifecycleListen string
 	CorsDomain      string
 	AuthUsers       []string
+  CounterExpiration time.Duration
 }
 
 const (

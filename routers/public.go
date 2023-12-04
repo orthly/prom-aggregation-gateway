@@ -1,6 +1,8 @@
 package routers
 
 import (
+  "time"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	promMetrics "github.com/slok/go-http-metrics/metrics/prometheus"
@@ -12,6 +14,7 @@ import (
 type ApiRouterConfig struct {
 	CorsDomain   string
 	Accounts     []string
+  CounterExpiration time.Duration
 	authAccounts gin.Accounts
 }
 

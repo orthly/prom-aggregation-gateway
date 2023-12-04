@@ -21,6 +21,7 @@ func startFunc(cmd *cobra.Command, args []string) error {
 	apiCfg := routers.ApiRouterConfig{
 		CorsDomain: cfg.CorsDomain,
 		Accounts:   cfg.AuthUsers,
+    CounterExpiration: cfg.CounterExpiration,
 	}
 
 	routers.RunServers(apiCfg, cfg.ApiListen, cfg.LifecycleListen)
